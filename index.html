@@ -423,6 +423,12 @@
         <button class="btn btn-export btn-sm" id="exportJsonBtn" aria-label="Export inventory to JSON">
           📄 Export JSON
         </button>
+
+        <!-- Import JSON -->
+        <button class="btn btn-import btn-sm" id="importJsonBtn" aria-label="Import inventory from JSON">
+          📂 Import JSON
+        </button>
+        <input type="file" id="importJsonFile" accept=".json,application/json" style="display:none" aria-hidden="true" />
       </div>
 
       <!-- Table Card -->
@@ -745,6 +751,12 @@
         <button class="btn btn-export btn-sm" id="exportDeviceJsonBtn" aria-label="Export devices to JSON">
           📄 Export JSON
         </button>
+
+        <!-- Import JSON -->
+        <button class="btn btn-import btn-sm" id="importDeviceJsonBtn" aria-label="Import devices from JSON">
+          📂 Import JSON
+        </button>
+        <input type="file" id="importDeviceJsonFile" accept=".json,application/json" style="display:none" aria-hidden="true" />
       </div>
 
       <!-- Table Card -->
@@ -811,6 +823,39 @@
     <div class="modal-actions">
       <button class="btn btn-secondary" id="deleteCancelBtn">Cancel</button>
       <button class="btn btn-danger" id="deleteConfirmBtn">🗑️ Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================
+     IMPORT PREVIEW MODAL
+========================= -->
+<div
+  class="modal-backdrop"
+  id="importModal"
+  style="display:none;"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="importModalTitle"
+>
+  <div class="modal modal-import">
+    <span class="modal-icon" aria-hidden="true">📂</span>
+    <h2 class="modal-title" id="importModalTitle">Import JSON</h2>
+    <p class="modal-body" id="importModalBody">Ready to import items.</p>
+
+    <!-- Preview table -->
+    <div class="import-preview-wrap" id="importPreviewWrap">
+      <table class="import-preview-table" id="importPreviewTable" aria-label="Import preview">
+        <thead id="importPreviewHead"></thead>
+        <tbody id="importPreviewBody"></tbody>
+      </table>
+    </div>
+
+    <div class="import-stats" id="importStats"></div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="importCancelBtn">Cancel</button>
+      <button class="btn btn-primary" id="importConfirmBtn">✅ Import All</button>
     </div>
   </div>
 </div>

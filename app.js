@@ -730,6 +730,32 @@ document.addEventListener('DOMContentLoaded', () => {
   // Export devices JSON
   document.getElementById('exportDeviceJsonBtn')?.addEventListener('click', exportDevicesJSON);
 
+  // Import JSON (inventory)
+  document.getElementById('importJsonBtn')?.addEventListener('click', () => {
+    const fi = document.getElementById('importJsonFile');
+    fi.value = '';
+    fi.click();
+  });
+  document.getElementById('importJsonFile')?.addEventListener('change', e => {
+    if (e.target.files[0]) importInventoryJSON(e.target.files[0]);
+  });
+
+  // Import JSON (devices)
+  document.getElementById('importDeviceJsonBtn')?.addEventListener('click', () => {
+    const fi = document.getElementById('importDeviceJsonFile');
+    fi.value = '';
+    fi.click();
+  });
+  document.getElementById('importDeviceJsonFile')?.addEventListener('change', e => {
+    if (e.target.files[0]) importDevicesJSON(e.target.files[0]);
+  });
+
+  // Import modal cancel / backdrop-click
+  document.getElementById('importCancelBtn')?.addEventListener('click', closeImportModal);
+  document.getElementById('importModal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('importModal')) closeImportModal();
+  });
+
   // Seed demo data on very first launch
   if (window.__needsSeed) {
     seedDemoData();
@@ -1193,6 +1219,219 @@ function exportDevicesJSON() {
 
   URL.revokeObjectURL(url);
   showToast(`Exported ${filtered.length} device${filtered.length !== 1 ? 's' : ''} to JSON! 📄`, 'success');
+}
+
+// =========================================
+// IMPORT JSON — SHARED HELPERS
+// =========================================
+let _importPendingItems = [];
+let _importPendingKind  = ''; // 'inventory' | 'devices'
+
+function closeImportModal() {
+  document.getElementById('importModal').style.display = 'none';
+  _importPendingItems = [];
+  _importPendingKind  = '';
+}
+
+function openImportModal(kind, newItems, dupCount) {
+  _importPendingKind  = kind;
+  _importPendingItems = newItems;
+
+  document.getElementById('importModalTitle').textContent =
+    kind === 'inventory' ? '📂 Import Inventory JSON' : '📂 Import Devices JSON';
+  document.getElementById('importModalBody').textContent =
+    `Found ${newItems.length + dupCount} record${newItems.length + dupCount !== 1 ? 's' : ''} in file.`;
+
+  // Stats bar
+  const statsEl = document.getElementById('importStats');
+  const parts = [];
+  if (newItems.length > 0) parts.push(`<span class="import-stat new">✅ ${newItems.length} new</span>`);
+  if (dupCount > 0)        parts.push(`<span class="import-stat dup">⏭️ ${dupCount} duplicate${dupCount !== 1 ? 's' : ''} skipped</span>`);
+  statsEl.innerHTML = parts.join('');
+
+  // Preview table (max 10 rows)
+  const preview = newItems.slice(0, 10);
+  const headEl  = document.getElementById('importPreviewHead');
+  const bodyEl  = document.getElementById('importPreviewBody');
+
+  if (kind === 'inventory') {
+    headEl.innerHTML = `<tr>
+      <th>#</th><th>Type</th><th>Brand</th><th>Capacity</th>
+      <th>Healthy</th><th>Faulty</th><th>Date</th>
+    </tr>`;
+    bodyEl.innerHTML = preview.map((item, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${escHtml(item.type)}</td>
+        <td>${escHtml(item.brand)}</td>
+        <td>${escHtml(item.capacity || '—')}</td>
+        <td><span class="qty-green">✓ ${item.healthyQty}</span></td>
+        <td><span class="qty-red">${item.faultyQty > 0 ? '✕ ' + item.faultyQty : '—'}</span></td>
+        <td>${escHtml(item.date || '—')}</td>
+      </tr>
+    `).join('');
+  } else {
+    headEl.innerHTML = `<tr>
+      <th>#</th><th>Type</th><th>Brand</th><th>Model</th>
+      <th>RAM</th><th>CPU</th><th>Storage</th>
+    </tr>`;
+    bodyEl.innerHTML = preview.map((item, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${escHtml(item.type)}</td>
+        <td>${escHtml(item.brand)}</td>
+        <td>${escHtml(item.model)}</td>
+        <td>${escHtml(item.ram || '—')}</td>
+        <td style="font-size:11px">${escHtml(item.cpu || '—')}</td>
+        <td>${escHtml(item.storage || '—')}</td>
+      </tr>
+    `).join('');
+  }
+
+  if (newItems.length > 10) {
+    const colspan = kind === 'inventory' ? 7 : 7;
+    bodyEl.innerHTML += `<tr><td colspan="${colspan}" style="text-align:center;color:var(--text-muted);font-size:12px;padding:8px 4px">… and ${newItems.length - 10} more item${newItems.length - 10 !== 1 ? 's' : ''}</td></tr>`;
+  }
+
+  const confirmBtn = document.getElementById('importConfirmBtn');
+  confirmBtn.textContent = newItems.length === 0
+    ? 'Nothing to Import'
+    : `✅ Import ${newItems.length} Item${newItems.length !== 1 ? 's' : ''}`;
+  confirmBtn.disabled = (newItems.length === 0);
+  confirmBtn.onclick  = executeImport;
+
+  document.getElementById('importModal').style.display = 'flex';
+}
+
+function executeImport() {
+  if (_importPendingKind === 'inventory') {
+    // Prepend in original order
+    inventory.unshift(...[..._importPendingItems].reverse());
+    saveInventory();
+    showToast(`✅ Imported ${_importPendingItems.length} inventory item${_importPendingItems.length !== 1 ? 's' : ''}!`, 'success');
+    closeImportModal();
+    navigateTo('inventory');
+  } else if (_importPendingKind === 'devices') {
+    devices.unshift(...[..._importPendingItems].reverse());
+    saveDevices();
+    showToast(`✅ Imported ${_importPendingItems.length} device${_importPendingItems.length !== 1 ? 's' : ''}!`, 'success');
+    closeImportModal();
+    navigateTo('devices');
+  }
+}
+
+// =========================================
+// IMPORT INVENTORY JSON
+// =========================================
+function importInventoryJSON(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let parsed;
+    try { parsed = JSON.parse(e.target.result); }
+    catch { showToast('❌ Invalid JSON file — could not parse.', 'error'); return; }
+
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      showToast('❌ JSON must be a non-empty array.', 'error');
+      return;
+    }
+
+    const valid = parsed.filter(item =>
+      item && typeof item === 'object' && item.type && item.brand
+    );
+
+    if (valid.length === 0) {
+      showToast('❌ No valid items found. Each entry needs "type" and "brand".', 'error');
+      return;
+    }
+
+    const existingIds = new Set(inventory.map(i => i.id));
+    let dupCount = 0;
+    const seenInFile = new Set();
+
+    const newItems = valid
+      .map(item => ({
+        _origId:    item.id,
+        id:         item.id && !existingIds.has(item.id) ? item.id : generateId(),
+        type:       item.type        || '',
+        brand:      item.brand       || '',
+        capacity:   item.capacity    || '',
+        healthyQty: Number(item.healthyQty)  || 0,
+        faultyQty:  Number(item.faultyQty)   || 0,
+        totalQty:   (Number(item.healthyQty) || 0) + (Number(item.faultyQty) || 0),
+        notes:      item.notes       || '',
+        date:       item.dateChecked || item.date || '',
+        createdAt:  item.dateAdded   || item.createdAt || new Date().toISOString(),
+      }))
+      .filter(item => {
+        const oid = item._origId;
+        if (existingIds.has(oid) || seenInFile.has(oid)) { dupCount++; return false; }
+        if (oid) seenInFile.add(oid);
+        return true;
+      })
+      .map(({ _origId, ...rest }) => rest);
+
+    openImportModal('inventory', newItems, dupCount);
+  };
+  reader.readAsText(file);
+}
+
+// =========================================
+// IMPORT DEVICES JSON
+// =========================================
+function importDevicesJSON(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let parsed;
+    try { parsed = JSON.parse(e.target.result); }
+    catch { showToast('❌ Invalid JSON file — could not parse.', 'error'); return; }
+
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      showToast('❌ JSON must be a non-empty array.', 'error');
+      return;
+    }
+
+    const valid = parsed.filter(item =>
+      item && typeof item === 'object' && item.type && item.brand && item.model
+    );
+
+    if (valid.length === 0) {
+      showToast('❌ No valid devices found. Each entry needs "type", "brand", and "model".', 'error');
+      return;
+    }
+
+    const existingIds = new Set(devices.map(d => d.id));
+    let dupCount = 0;
+    const seenInFile = new Set();
+
+    const newItems = valid
+      .map(item => ({
+        _origId:      item.id,
+        id:           item.id && !existingIds.has(item.id) ? item.id : generateId(),
+        type:         item.type         || '',
+        brand:        item.brand        || '',
+        model:        item.model        || '',
+        ram:          item.ram          || '',
+        cpu:          item.cpu          || '',
+        storage:      item.storage      || '',
+        condSound:    item.condSound    || '',
+        condKeyboard: item.condKeyboard || '',
+        condScreen:   item.condScreen   || '',
+        condCamera:   item.condCamera   || '',
+        notes:        item.notes        || '',
+        date:         item.dateChecked  || item.date || '',
+        createdAt:    item.dateAdded    || item.createdAt || new Date().toISOString(),
+      }))
+      .filter(item => {
+        const oid = item._origId;
+        if (existingIds.has(oid) || seenInFile.has(oid)) { dupCount++; return false; }
+        if (oid) seenInFile.add(oid);
+        return true;
+      })
+      .map(({ _origId, ...rest }) => rest);
+
+    openImportModal('devices', newItems, dupCount);
+  };
+  reader.readAsText(file);
 }
 
 // =========================================
