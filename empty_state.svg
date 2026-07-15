@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 360" fill="none">
+  <!-- Background blobs -->
+  <ellipse cx="200" cy="280" rx="160" ry="30" fill="#ede9ff" opacity="0.5"/>
+  <circle cx="80" cy="100" r="50" fill="#e8f0fe" opacity="0.6"/>
+  <circle cx="320" cy="130" r="40" fill="#f3e5f5" opacity="0.6"/>
+
+  <!-- Magnifying glass -->
+  <circle cx="200" cy="155" r="80" fill="#f0eeff" stroke="#c5b8e8" stroke-width="3"/>
+  <circle cx="200" cy="155" r="65" fill="#faf9ff" stroke="#d8cfff" stroke-width="2"/>
+
+  <!-- Handle -->
+  <line x1="260" y1="215" x2="295" y2="250" stroke="#b39ddb" stroke-width="10" stroke-linecap="round"/>
+  <rect x="285" y="240" width="18" height="26" rx="9" fill="#b39ddb" transform="rotate(45 294 253)"/>
+
+  <!-- Cute face inside lens -->
+  <circle cx="188" cy="148" r="6" fill="#7c6fa0"/>
+  <circle cx="212" cy="148" r="6" fill="#7c6fa0"/>
+  <!-- Pupils highlight -->
+  <circle cx="190" cy="146" r="2" fill="white"/>
+  <circle cx="214" cy="146" r="2" fill="white"/>
+  <!-- Sad mouth -->
+  <path d="M185 168 Q200 162 215 168" stroke="#7c6fa0" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+  <!-- Floating RAM stick (left) -->
+  <g transform="translate(52, 160) rotate(-15)">
+    <rect width="80" height="22" rx="4" fill="#c5cae9" stroke="#9fa8da" stroke-width="1.5"/>
+    <rect x="8" y="-8" width="6" height="10" rx="2" fill="#9fa8da"/>
+    <rect x="18" y="-8" width="6" height="10" rx="2" fill="#9fa8da"/>
+    <rect x="28" y="-8" width="6" height="10" rx="2" fill="#9fa8da"/>
+    <rect x="38" y="-8" width="6" height="10" rx="2" fill="#9fa8da"/>
+    <rect x="48" y="-8" width="6" height="10" rx="2" fill="#9fa8da"/>
+    <rect x="58" y="-8" width="6" height="10" rx="2" fill="#9fa8da"/>
+    <!-- Cute chip face -->
+    <rect x="16" y="5" width="48" height="12" rx="2" fill="#e8eaf6"/>
+    <circle cx="30" cy="11" r="2.5" fill="#7986cb"/>
+    <circle cx="50" cy="11" r="2.5" fill="#7986cb"/>
+    <path d="M38 15 Q40 13 42 15" stroke="#7986cb" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- Floating SSD (right) -->
+  <g transform="translate(295, 190) rotate(12)">
+    <rect width="64" height="38" rx="6" fill="#bbdefb" stroke="#90caf9" stroke-width="1.5"/>
+    <rect x="4" y="4" width="56" height="20" rx="3" fill="#e3f2fd"/>
+    <!-- Connector pins -->
+    <rect x="8" y="28" width="4" height="8" rx="1" fill="#90caf9"/>
+    <rect x="14" y="28" width="4" height="8" rx="1" fill="#90caf9"/>
+    <rect x="20" y="28" width="4" height="8" rx="1" fill="#90caf9"/>
+    <rect x="26" y="28" width="4" height="8" rx="1" fill="#90caf9"/>
+    <rect x="32" y="28" width="4" height="8" rx="1" fill="#90caf9"/>
+    <!-- Cute face -->
+    <circle cx="22" cy="14" r="3" fill="#42a5f5"/>
+    <circle cx="42" cy="14" r="3" fill="#42a5f5"/>
+    <circle cx="23" cy="13" r="1" fill="white"/>
+    <circle cx="43" cy="13" r="1" fill="white"/>
+    <path d="M27 19 Q32 22 37 19" stroke="#42a5f5" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- Small star sparkles -->
+  <g fill="#b39ddb" opacity="0.7">
+    <polygon points="340,60  342,67  349,67  343,71  345,78  340,74  335,78  337,71  331,67  338,67" transform="scale(0.6) translate(225,55)"/>
+    <polygon points="70,60   72,67   79,67   73,71   75,78   70,74   65,78   67,71   61,67   68,67"  transform="scale(0.5) translate(55, 45)"/>
+    <circle cx="350" cy="90" r="4" fill="#f48fb1" opacity="0.6"/>
+    <circle cx="60"  cy="200" r="3" fill="#90caf9" opacity="0.6"/>
+    <circle cx="340" cy="240" r="3" fill="#a5d6a7" opacity="0.6"/>
+  </g>
+
+  <!-- Dots pattern (decorative) -->
+  <circle cx="140" cy="55" r="3" fill="#c5cae9" opacity="0.5"/>
+  <circle cx="155" cy="45" r="2" fill="#c5cae9" opacity="0.4"/>
+  <circle cx="260" cy="55" r="3" fill="#c5cae9" opacity="0.5"/>
+  <circle cx="248" cy="44" r="2" fill="#c5cae9" opacity="0.4"/>
+</svg>

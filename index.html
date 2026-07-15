@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Techie Inventory — A modern, cute inventory management app for tracking computer components like RAM, HDD, SSD, CPU, and GPU." />
+  <meta name="keywords" content="inventory, computer components, RAM, SSD, HDD, CPU, GPU, tech inventory" />
+  <title>Techie Inventory 💻</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+<body>
+
+<!-- ========================
+     APP SHELL
+========================= -->
+<div class="app-shell">
+
+  <!-- ---- SIDEBAR ---- -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main Navigation">
+    <div class="sidebar-brand">
+      <div class="brand-icon" aria-hidden="true">💻</div>
+      <div>
+        <div class="brand-name">Techie Inventory</div>
+        <div class="brand-tagline">Component Tracker</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Menu</div>
+
+      <button class="nav-item active" id="nav-dashboard" data-nav="dashboard" aria-current="page">
+        <span class="nav-icon" aria-hidden="true">📊</span>
+        Dashboard
+      </button>
+
+      <button class="nav-item" id="nav-add" data-nav="add">
+        <span class="nav-icon" aria-hidden="true">➕</span>
+        Add Inventory
+      </button>
+
+      <button class="nav-item" id="nav-inventory" data-nav="inventory">
+        <span class="nav-icon" aria-hidden="true">📦</span>
+        View Inventory
+      </button>
+
+      <div class="nav-section-label" style="margin-top:16px">Devices</div>
+
+      <button class="nav-item" id="nav-add-device" data-nav="add-device">
+        <span class="nav-icon" aria-hidden="true">➕</span>
+        Add Device
+      </button>
+
+      <button class="nav-item" id="nav-devices" data-nav="devices">
+        <span class="nav-icon" aria-hidden="true">🖥️</span>
+        View Devices
+      </button>
+
+      <div class="nav-section-label" style="margin-top:16px">Components</div>
+
+      <div style="padding: 8px 12px; display:flex; flex-wrap:wrap; gap:6px;">
+        <span class="chip">🧠 RAM</span>
+        <span class="chip">💾 HDD</span>
+        <span class="chip">💿 SSD SATA</span>
+        <span class="chip">⚡ SSD NVMe</span>
+        <span class="chip">🔲 CPU</span>
+        <span class="chip">🎮 GPU</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <div class="toggle-track" aria-hidden="true">
+          <div class="toggle-thumb"></div>
+        </div>
+        <span class="toggle-label" id="themeLabel">Light Mode</span>
+        <span id="themeIcon" aria-hidden="true" style="margin-left:auto; font-size:16px">☀️</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Overlay for mobile -->
+  <div class="overlay" id="overlay" role="presentation"></div>
+
+  <!-- ---- MAIN CONTENT ---- -->
+  <main class="main-content" role="main">
+
+    <!-- Top Bar -->
+    <header class="topbar" role="banner">
+      <div class="topbar-left">
+        <button class="hamburger" id="hamburger" aria-label="Open sidebar" aria-expanded="false">
+          ☰
+        </button>
+        <div>
+          <div class="page-title-bar" id="topbarTitle">📊 Dashboard</div>
+          <div class="page-subtitle-bar" id="topbarSub">Overview of your component inventory</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-date" id="topbarDate" aria-label="Today's date"></div>
+        <button class="btn btn-primary btn-sm" id="addInventoryBtn" aria-label="Add new inventory item">
+          ➕ Add Item
+        </button>
+      </div>
+    </header>
+
+    <!-- ================================================
+         PAGE: DASHBOARD
+    ================================================= -->
+    <section class="page-view active" id="page-dashboard" aria-labelledby="dashHeading">
+      <h1 id="dashHeading" class="sr-only">Dashboard</h1>
+
+      <!-- Hero Card -->
+      <div class="hero-card">
+        <div class="hero-greeting">Hello, Tech Manager! 👋</div>
+        <h2 class="hero-title">Your Inventory at a Glance</h2>
+        <p class="hero-sub">Track your computer components — healthy, faulty, and everything in between.</p>
+        <div class="hero-emoji" aria-hidden="true">💻</div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid" role="list">
+        <div class="stat-card lav" role="listitem">
+          <div class="stat-card-inner">
+            <span class="stat-icon" aria-hidden="true">📦</span>
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-label">Total Components</div>
+            <div class="stat-trend">All units combined</div>
+          </div>
+        </div>
+
+        <div class="stat-card blue" role="listitem">
+          <div class="stat-card-inner">
+            <span class="stat-icon" aria-hidden="true">✅</span>
+            <div class="stat-value" id="statHealthy">0</div>
+            <div class="stat-label">Healthy Items</div>
+            <div class="stat-trend">Ready for use</div>
+          </div>
+        </div>
+
+        <div class="stat-card peach" role="listitem">
+          <div class="stat-card-inner">
+            <span class="stat-icon" aria-hidden="true">⚠️</span>
+            <div class="stat-value" id="statFaulty">0</div>
+            <div class="stat-label">Faulty Items</div>
+            <div class="stat-trend">Needs attention</div>
+          </div>
+        </div>
+
+        <div class="stat-card green" role="listitem">
+          <div class="stat-card-inner">
+            <span class="stat-icon" aria-hidden="true">📅</span>
+            <div class="stat-value" id="statToday">0</div>
+            <div class="stat-label">Logged Today</div>
+            <div class="stat-trend" id="statTodayTrend">Entries logged today</div>
+          </div>
+        </div>
+
+        <div class="stat-card teal" role="listitem">
+          <div class="stat-card-inner">
+            <span class="stat-icon" aria-hidden="true">🖥️</span>
+            <div class="stat-value" id="statDevices">0</div>
+            <div class="stat-label">Total Devices</div>
+            <div class="stat-trend" id="statDevicesSub">Laptops &amp; Desktops</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard Widgets -->
+      <div class="dashboard-grid">
+        <!-- Component Breakdown -->
+        <div class="widget-card">
+          <h3 class="widget-title">
+            <span aria-hidden="true">📊</span>
+            Component Breakdown
+          </h3>
+          <div class="widget-legend">
+            <span class="legend-dot" style="background:#4caf50"></span> Healthy
+            <span class="legend-dot" style="background:#f44336;margin-left:10px"></span> Faulty
+          </div>
+          <div id="typeBreakdown" aria-label="Inventory breakdown by component type">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="widget-card">
+          <h3 class="widget-title">
+            <span aria-hidden="true">🕒</span>
+            Recent Activity
+          </h3>
+          <div id="recentActivity" aria-label="Recent inventory activity">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Device Health Summary -->
+        <div class="widget-card">
+          <h3 class="widget-title">
+            <span aria-hidden="true">🖥️</span>
+            Device Health
+          </h3>
+          <div class="widget-sub" id="deviceCondSummarySub"></div>
+          <div id="deviceCondSummary" aria-label="Device condition summary">
+            <!-- Rendered by JS -->
+          </div>
+          <button class="dash-link dash-link-btn" onclick="navigateTo('devices')" style="margin-top:14px">View all devices →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================
+         PAGE: ADD INVENTORY
+    ================================================= -->
+    <section class="page-view" id="page-add" aria-labelledby="addHeading">
+      <h1 id="addHeading" class="sr-only">Add Inventory</h1>
+
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-icon" aria-hidden="true">📝</div>
+          <div>
+            <div class="form-card-title" id="formTitle">Add New Item</div>
+            <div class="form-card-sub" id="formSub">Fill in the details for the new component</div>
+          </div>
+        </div>
+
+        <form id="inventoryForm" novalidate>
+          <div class="form-grid">
+
+            <!-- Component Type -->
+            <div class="form-group">
+              <label class="form-label" for="fType">
+                🔧 Component Type <span class="required" aria-hidden="true">*</span>
+              </label>
+              <select class="form-select" id="fType" name="type" required aria-required="true">
+                <option value="" disabled selected>Select a type…</option>
+                <option value="RAM">🧠 RAM</option>
+                <option value="HDD">💾 HDD</option>
+                <option value="SSD SATA">💿 SSD SATA</option>
+                <option value="SSD NVMe">⚡ SSD NVMe</option>
+                <option value="CPU">🔲 CPU</option>
+                <option value="GPU">🎮 GPU</option>
+              </select>
+            </div>
+
+            <!-- Brand -->
+            <div class="form-group">
+              <label class="form-label" for="fBrand">
+                🏷️ Brand <span class="required" aria-hidden="true">*</span>
+              </label>
+              <input
+                type="text"
+                class="form-input"
+                id="fBrand"
+                name="brand"
+                placeholder="e.g. Samsung, Kingston, NVIDIA…"
+                required
+                aria-required="true"
+                autocomplete="off"
+              />
+            </div>
+
+            <!-- Capacity -->
+            <div class="form-group">
+              <label class="form-label" for="fCapacity">
+                📏 Capacity / Model
+              </label>
+              <input
+                type="text"
+                class="form-input"
+                id="fCapacity"
+                name="capacity"
+                placeholder="e.g. 8GB DDR4, 1TB, RTX 3060…"
+                autocomplete="off"
+              />
+            </div>
+
+            <!-- Date -->
+            <div class="form-group">
+              <label class="form-label" for="fDate">
+                📅 Date Checked
+              </label>
+              <input
+                type="date"
+                class="form-input"
+                id="fDate"
+                name="date"
+              />
+            </div>
+
+            <!-- Healthy Quantity -->
+            <div class="form-group">
+              <label class="form-label" for="fHealthy">
+                ✅ Healthy Quantity
+              </label>
+              <input
+                type="number"
+                class="form-input"
+                id="fHealthy"
+                name="healthyQty"
+                placeholder="0"
+                min="0"
+                value="0"
+              />
+              <span class="form-hint">Units in working condition</span>
+            </div>
+
+            <!-- Faulty Quantity -->
+            <div class="form-group">
+              <label class="form-label" for="fFaulty">
+                ⚠️ Faulty Quantity
+              </label>
+              <input
+                type="number"
+                class="form-input"
+                id="fFaulty"
+                name="faultyQty"
+                placeholder="0"
+                min="0"
+                value="0"
+              />
+              <span class="form-hint">Units that need repair or replacement</span>
+            </div>
+
+            <!-- Total (auto) -->
+            <div class="form-group">
+              <label class="form-label" for="fTotal">
+                🔢 Total Quantity
+              </label>
+              <div class="total-display" id="fTotal" role="status" aria-live="polite" aria-label="Total quantity">
+                0
+              </div>
+              <span class="form-hint">Calculated automatically (Healthy + Faulty)</span>
+            </div>
+
+            <!-- Spacer -->
+            <div></div>
+
+            <!-- Notes -->
+            <div class="form-group full">
+              <label class="form-label" for="fNotes">
+                📝 Notes
+              </label>
+              <textarea
+                class="form-textarea"
+                id="fNotes"
+                name="notes"
+                placeholder="Any observations, serial numbers, or additional info…"
+              ></textarea>
+            </div>
+
+          </div><!-- /form-grid -->
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="formCancel">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" id="formSubmitBtn">
+              ✅ Add to Inventory
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ================================================
+         PAGE: INVENTORY TABLE
+    ================================================= -->
+    <section class="page-view" id="page-inventory" aria-labelledby="invHeading">
+      <h1 id="invHeading" class="sr-only">Inventory</h1>
+
+      <!-- Controls -->
+      <div class="inventory-controls">
+        <!-- Search -->
+        <div class="search-wrap" role="search">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input
+            type="search"
+            class="search-input"
+            id="searchInput"
+            placeholder="Search by brand, type, capacity…"
+            aria-label="Search inventory"
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- Filter: Type -->
+        <select class="filter-select" id="filterType" aria-label="Filter by component type">
+          <option value="">All Types</option>
+          <option value="RAM">🧠 RAM</option>
+          <option value="HDD">💾 HDD</option>
+          <option value="SSD SATA">💿 SSD SATA</option>
+          <option value="SSD NVMe">⚡ SSD NVMe</option>
+          <option value="CPU">🔲 CPU</option>
+          <option value="GPU">🎮 GPU</option>
+        </select>
+
+        <!-- Filter: Brand -->
+        <select class="filter-select" id="filterBrand" aria-label="Filter by brand">
+          <option value="">All Brands</option>
+        </select>
+
+        <!-- Clear -->
+        <button class="btn btn-secondary btn-sm" id="clearFilters" aria-label="Clear all filters">
+          🗑️ Clear
+        </button>
+
+        <!-- Count -->
+        <span class="results-count" id="resultsCount" aria-live="polite" aria-atomic="true">0 results</span>
+
+        <!-- Add Button -->
+        <button class="btn btn-primary btn-sm" id="addInventoryBtn2" onclick="openAdd()">
+          ➕ Add Item
+        </button>
+
+        <!-- Export CSV -->
+        <button class="btn btn-export btn-sm" id="exportCsvBtn" aria-label="Export inventory to CSV">
+          📥 Export CSV
+        </button>
+
+        <!-- Export JSON -->
+        <button class="btn btn-export btn-sm" id="exportJsonBtn" aria-label="Export inventory to JSON">
+          📄 Export JSON
+        </button>
+      </div>
+
+      <!-- Table Card -->
+      <div class="table-card">
+        <div class="table-wrap">
+          <table aria-label="Inventory table">
+            <thead>
+              <tr>
+                <th scope="col">Component</th>
+                <th scope="col">Type</th>
+                <th scope="col">Capacity</th>
+                <th scope="col">Healthy</th>
+                <th scope="col">Faulty</th>
+                <th scope="col">Total</th>
+                <th scope="col">Status</th>
+                <th scope="col">Date</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTbody">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="inventoryEmpty" style="display:none;" role="status">
+          <img
+            src="empty_state.svg"
+            alt="No inventory items found illustration"
+            class="empty-illustration"
+            id="emptyIllustration"
+            onerror="this.style.display='none'; document.getElementById('emptyEmoji').style.display='block';"
+          />
+          <div id="emptyEmoji" style="display:none; font-size:80px; margin-bottom:16px; animation: float 3s ease-in-out infinite;" aria-hidden="true">🔍</div>
+          <div class="empty-title">Nothing here yet!</div>
+          <p class="empty-sub">
+            No components match your search or filter. Try adjusting your filters,
+            or add your first inventory item! 😊
+          </p>
+          <button class="btn btn-primary" id="addFirstBtn">
+            ➕ Add First Item
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================
+         PAGE: ADD DEVICE
+    ================================================= -->
+    <section class="page-view" id="page-add-device" aria-labelledby="addDeviceHeading">
+      <h1 id="addDeviceHeading" class="sr-only">Add Device</h1>
+
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-icon" aria-hidden="true">🖥️</div>
+          <div>
+            <div class="form-card-title" id="deviceFormTitle">Add New Device</div>
+            <div class="form-card-sub" id="deviceFormSub">Fill in the details for the laptop or PC</div>
+          </div>
+        </div>
+
+        <form id="deviceForm" novalidate>
+          <div class="form-grid">
+
+            <!-- Device Type -->
+            <div class="form-group">
+              <label class="form-label" for="dType">
+                🖥️ Device Type <span class="required" aria-hidden="true">*</span>
+              </label>
+              <select class="form-select" id="dType" name="type" required aria-required="true">
+                <option value="" disabled selected>Select type…</option>
+                <option value="Laptop">💻 Laptop</option>
+                <option value="Desktop PC">🖥️ Desktop PC</option>
+              </select>
+            </div>
+
+            <!-- Brand -->
+            <div class="form-group">
+              <label class="form-label" for="dBrand">
+                🏷️ Brand <span class="required" aria-hidden="true">*</span>
+              </label>
+              <input
+                type="text"
+                class="form-input"
+                id="dBrand"
+                name="brand"
+                placeholder="e.g. Lenovo, Dell, HP, Asus…"
+                required
+                aria-required="true"
+                autocomplete="off"
+              />
+            </div>
+
+            <!-- Model -->
+            <div class="form-group">
+              <label class="form-label" for="dModel">
+                📋 Model <span class="required" aria-hidden="true">*</span>
+              </label>
+              <input
+                type="text"
+                class="form-input"
+                id="dModel"
+                name="model"
+                placeholder="e.g. ThinkPad X1, Inspiron 15…"
+                required
+                aria-required="true"
+                autocomplete="off"
+              />
+            </div>
+
+            <!-- RAM -->
+            <div class="form-group">
+              <label class="form-label" for="dRam">
+                🧠 RAM
+              </label>
+              <select class="form-select" id="dRam" name="ram">
+                <option value="">Select RAM…</option>
+                <optgroup label="DDR3">
+                  <option value="2GB DDR3">2GB DDR3</option>
+                  <option value="4GB DDR3">4GB DDR3</option>
+                  <option value="8GB DDR3">8GB DDR3</option>
+                  <option value="16GB DDR3">16GB DDR3</option>
+                </optgroup>
+                <optgroup label="DDR4">
+                  <option value="4GB DDR4">4GB DDR4</option>
+                  <option value="8GB DDR4">8GB DDR4</option>
+                  <option value="12GB DDR4">12GB DDR4</option>
+                  <option value="16GB DDR4">16GB DDR4</option>
+                  <option value="32GB DDR4">32GB DDR4</option>
+                  <option value="64GB DDR4">64GB DDR4</option>
+                </optgroup>
+                <optgroup label="DDR5">
+                  <option value="8GB DDR5">8GB DDR5</option>
+                  <option value="16GB DDR5">16GB DDR5</option>
+                  <option value="32GB DDR5">32GB DDR5</option>
+                  <option value="64GB DDR5">64GB DDR5</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <!-- CPU -->
+            <div class="form-group">
+              <label class="form-label" for="dCpu">
+                🔲 CPU
+              </label>
+              <input
+                type="text"
+                class="form-input"
+                id="dCpu"
+                name="cpu"
+                placeholder="e.g. Intel Core i5-1235U, Ryzen 5 5600…"
+                autocomplete="off"
+              />
+            </div>
+
+            <!-- Storage -->
+            <div class="form-group">
+              <label class="form-label" for="dStorage">
+                💾 Storage
+              </label>
+              <input
+                type="text"
+                class="form-input"
+                id="dStorage"
+                name="storage"
+                placeholder="e.g. 256GB SSD, 1TB HDD…"
+                autocomplete="off"
+              />
+            </div>
+
+            <!-- Condition Sub-Categories -->
+            <div class="form-group full">
+              <label class="form-label">
+                ⭐ Condition by Category <span class="required" aria-hidden="true">*</span>
+              </label>
+              <div class="cond-grid">
+
+                <div class="cond-item">
+                  <span class="cond-icon">🔊</span>
+                  <label class="cond-label" for="dCondSound">Sound</label>
+                  <select class="form-select cond-select" id="dCondSound" name="condSound">
+                    <option value="" disabled selected>Select…</option>
+                    <option value="Good">🟢 Good</option>
+                    <option value="Fair">🟡 Fair</option>
+                    <option value="Poor">🔴 Poor</option>
+                    <option value="N/A">⚫ N/A</option>
+                  </select>
+                </div>
+
+                <div class="cond-item">
+                  <span class="cond-icon">⌨️</span>
+                  <label class="cond-label" for="dCondKeyboard">Keyboard</label>
+                  <select class="form-select cond-select" id="dCondKeyboard" name="condKeyboard">
+                    <option value="" disabled selected>Select…</option>
+                    <option value="Good">🟢 Good</option>
+                    <option value="Fair">🟡 Fair</option>
+                    <option value="Poor">🔴 Poor</option>
+                    <option value="N/A">⚫ N/A</option>
+                  </select>
+                </div>
+
+                <div class="cond-item">
+                  <span class="cond-icon">🖼️</span>
+                  <label class="cond-label" for="dCondScreen">Screen</label>
+                  <select class="form-select cond-select" id="dCondScreen" name="condScreen">
+                    <option value="" disabled selected>Select…</option>
+                    <option value="Good">🟢 Good</option>
+                    <option value="Fair">🟡 Fair</option>
+                    <option value="Poor">🔴 Poor</option>
+                    <option value="N/A">⚫ N/A</option>
+                  </select>
+                </div>
+
+                <div class="cond-item">
+                  <span class="cond-icon">📷</span>
+                  <label class="cond-label" for="dCondCamera">Camera</label>
+                  <select class="form-select cond-select" id="dCondCamera" name="condCamera">
+                    <option value="" disabled selected>Select…</option>
+                    <option value="Good">🟢 Good</option>
+                    <option value="Fair">🟡 Fair</option>
+                    <option value="Poor">🔴 Poor</option>
+                    <option value="N/A">⚫ N/A</option>
+                  </select>
+                </div>
+
+              </div>
+              <span class="form-hint">Rate each part: Good → Fair → Poor → N/A (not applicable)</span>
+            </div>
+
+            <!-- Date -->
+            <div class="form-group">
+              <label class="form-label" for="dDate">
+                📅 Date Checked
+              </label>
+              <input
+                type="date"
+                class="form-input"
+                id="dDate"
+                name="date"
+              />
+            </div>
+
+            <!-- Notes -->
+            <div class="form-group full">
+              <label class="form-label" for="dNotes">
+                📝 Notes
+              </label>
+              <textarea
+                class="form-textarea"
+                id="dNotes"
+                name="notes"
+                placeholder="Serial number, observed issues, owner/location, or any other details…"
+              ></textarea>
+            </div>
+
+          </div><!-- /form-grid -->
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="deviceFormCancel">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" id="deviceFormSubmitBtn">
+              ✅ Add Device
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ================================================
+         PAGE: VIEW DEVICES
+    ================================================= -->
+    <section class="page-view" id="page-devices" aria-labelledby="devicesHeading">
+      <h1 id="devicesHeading" class="sr-only">Devices</h1>
+
+      <!-- Controls -->
+      <div class="inventory-controls">
+        <div class="search-wrap" role="search">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input
+            type="search"
+            class="search-input"
+            id="deviceSearchInput"
+            placeholder="Search by brand, model, CPU…"
+            aria-label="Search devices"
+            autocomplete="off"
+          />
+        </div>
+
+        <select class="filter-select" id="deviceFilterType" aria-label="Filter by device type">
+          <option value="">All Types</option>
+          <option value="Laptop">💻 Laptop</option>
+          <option value="Desktop PC">🖥️ Desktop PC</option>
+        </select>
+
+        <select class="filter-select" id="deviceFilterCondition" aria-label="Filter by condition">
+          <option value="">All Conditions</option>
+          <option value="Excellent">🟢 Excellent</option>
+          <option value="Good">🔵 Good</option>
+          <option value="Fair">🟡 Fair</option>
+          <option value="Poor">🔴 Poor</option>
+        </select>
+
+        <button class="btn btn-secondary btn-sm" id="deviceClearFilters" aria-label="Clear device filters">
+          🗑️ Clear
+        </button>
+
+        <span class="results-count" id="deviceResultsCount" aria-live="polite" aria-atomic="true">0 results</span>
+
+        <button class="btn btn-primary btn-sm" onclick="openAddDevice()">
+          ➕ Add Device
+        </button>
+
+        <button class="btn btn-export btn-sm" id="exportDeviceCsvBtn" aria-label="Export devices to CSV">
+          📥 Export CSV
+        </button>
+
+        <!-- Export JSON -->
+        <button class="btn btn-export btn-sm" id="exportDeviceJsonBtn" aria-label="Export devices to JSON">
+          📄 Export JSON
+        </button>
+      </div>
+
+      <!-- Table Card -->
+      <div class="table-card">
+        <div class="table-wrap">
+          <table aria-label="Devices table">
+            <thead>
+              <tr>
+                <th scope="col">Device</th>
+                <th scope="col">Type</th>
+                <th scope="col">RAM</th>
+                <th scope="col">CPU</th>
+                <th scope="col">Storage</th>
+                <th scope="col">🔊 Sound</th>
+                <th scope="col">⌨️ Keyboard</th>
+                <th scope="col">🖼️ Screen</th>
+                <th scope="col">📷 Camera</th>
+                <th scope="col">Date</th>
+                <th scope="col">Notes</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="devicesTbody">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="devicesEmpty" style="display:none;" role="status">
+          <div style="font-size:80px; margin-bottom:16px; animation: float 3s ease-in-out infinite;" aria-hidden="true">🖥️</div>
+          <div class="empty-title">No devices yet!</div>
+          <p class="empty-sub">
+            Add your first laptop or PC to get started. Track their specs and condition easily. 😊
+          </p>
+          <button class="btn btn-primary" onclick="openAddDevice()">
+            ➕ Add First Device
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- /main-content -->
+</div><!-- /app-shell -->
+
+<!-- ========================
+     DELETE MODAL
+========================= -->
+<div
+  class="modal-backdrop"
+  id="deleteModal"
+  style="display:none;"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modalTitle"
+  aria-describedby="modalBody"
+>
+  <div class="modal">
+    <span class="modal-icon" aria-hidden="true">🗑️</span>
+    <h2 class="modal-title" id="modalTitle">Delete Item?</h2>
+    <p class="modal-body" id="modalBody">
+      This action cannot be undone. The item will be permanently removed from your inventory.
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="deleteCancelBtn">Cancel</button>
+      <button class="btn btn-danger" id="deleteConfirmBtn">🗑️ Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================
+     TOAST CONTAINER
+========================= -->
+<div class="toast-container" id="toastContainer" role="region" aria-label="Notifications" aria-live="polite"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
